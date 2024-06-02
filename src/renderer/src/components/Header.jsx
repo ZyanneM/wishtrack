@@ -5,6 +5,7 @@ const Header = () => {
   const [todos, setTodos] = useState([]) // Initial state
   const [showInput, setShowInput] = useState(false)
   const [newListName, setNewListName] = useState('')
+  const [activeListIndex, setActiveListIndex] = useState(null) // New state
 
   useEffect(() => {
     const loadTodos = async () => {
@@ -51,12 +52,30 @@ const Header = () => {
     )
   }
 
+  const toggleActive = (index) => {
+    setActiveListIndex((prevIndex) => (prevIndex === index ? null : index))
+  }
+
   return (
     <div>
+        <div className='list-container'>
       {todos.map((todoList, index) => (
         <div key={index}>
-          <h2>{todoList.name}</h2>
-          <Todo id={index} tasks={todoList.tasks || []} updateTasks={updateTasks} />
+          <div className='list-btn'
+            style={{
+              display: 'inline-block',
+              padding: '8px 20px',
+              borderRadius: '50px',
+              border: '1px solid',
+              cursor: 'pointer'
+            }}
+            onClick={() => toggleActive(index)}
+          >
+            {todoList.name}
+          </div>
+          <div className={index === activeListIndex ? 'active' : 'inactive'}>
+            <Todo id={index} tasks={todoList.tasks || []} updateTasks={updateTasks} />
+          </div>
         </div>
       ))}
       {showInput && (
@@ -65,6 +84,7 @@ const Header = () => {
           <button onClick={addNewList}>Confirm</button>
         </div>
       )}
+      </div>
       <button onClick={() => setShowInput(true)}>Add new list</button>
     </div>
   )

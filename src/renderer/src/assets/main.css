@@ -151,6 +151,33 @@ code {
   }
 }
 
+.active{
+  display: flex;
+}
+
+.inactive{
+  display: none;
+}
+
+.list-btn{
+  display: 'inline-block';
+  padding: '8px 20px';
+  border-radius: '50px';
+  border: '1px solid';
+  cursor: 'pointer';
+}
+
+.list-btn:hover {
+  background-color: black;
+  color: white;
+}
+
+.list-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 @media (max-width: 720px) {
   .text {
     font-size: 20px;
