@@ -1,82 +1,47 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react'
 
-const Todo = () => {
-  const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState('');
-
-  useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        const savedTasks = await window.electron.ipcRenderer.invoke('getSettingValue', 'tasks') || [];
-        setTasks(savedTasks);
-      } catch (error) {
-        console.error('Error loading tasks:', error);
-      }
-    };
-    loadTasks();
-  }, []);
-
-  useEffect(() => {
-    const saveTasks = async () => {
-      try {
-        await window.electron.ipcRenderer.invoke('setSettingValue', 'tasks', tasks);
-      } catch (error) {
-        console.error('Error saving tasks:', error);
-      }
-    };
-    saveTasks();
-  }, [tasks]);
+const Todo = ({ id, tasks: initialTasks, updateTasks }) => {
+  const [tasks, setTasks] = useState(initialTasks)
+  const [newTask, setNewTask] = useState('')
 
   const addTask = () => {
     if (newTask.trim() !== '') {
-      setTasks([...tasks, { text: newTask, completed: false }]);
+      const updatedTasks = [...tasks, { text: newTask, completed: false }];
+      setTasks(updatedTasks);
+      updateTasks(id, updatedTasks); // Pass updatedTasks here
       setNewTask('');
     }
   };
 
   const deleteTask = (indexToDelete) => {
-    setTasks(tasks.filter((_, index) => index !== indexToDelete));
-  };
+    const updatedTasks = tasks.filter((_, index) => index !== indexToDelete)
+    setTasks(updatedTasks)
+    updateTasks(updatedTasks)
+  }
 
   const toggleTaskCompletion = (indexToToggle) => {
-    setTasks(
-      tasks.map((task, index) => 
-        index === indexToToggle ? { ...task, completed: !task.completed } : task
-      )
-    );
-  };
+    const updatedTasks = tasks.map((task, index) =>
+      index === indexToToggle ? { ...task, completed: !task.completed } : task
+    )
+    setTasks(updatedTasks)
+    updateTasks(updatedTasks)
+  }
 
   return (
     <div>
-      <h1>Liste des tâches</h1>
-      <input
-        type="text"
-        value={newTask}
-        onChange={(e) => setNewTask(e.target.value)}
-        placeholder="Ajouter une nouvelle tâche"
-      />
-      <button onClick={addTask}>Ajouter une tâche</button>
-      <div>
-        {tasks.length === 0 ? (
-          <p>Aucune tâche à afficher</p>
-        ) : (
-          <ul>
-            {tasks.map((task, index) => (
-              <li key={index} style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={() => toggleTaskCompletion(index)}
-                />
-                {task.text}
-                <button onClick={() => deleteTask(index)}>Supprimer</button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {tasks.map((task, index) => (
+        <div key={index}>
+          <span style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
+            {task.text}
+          </span>
+          <button onClick={() => toggleTaskCompletion(index)}>Toggle completion</button>
+          <button onClick={() => deleteTask(index)}>Delete task</button>
+        </div>
+      ))}
+      <input type="text" value={newTask} onChange={(e) => setNewTask(e.target.value)} />
+      <button onClick={addTask}>Add task</button>
     </div>
-  );
-};
+  )
+}
 
-export default Todo;
+export default Todo
